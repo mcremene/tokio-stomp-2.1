@@ -16,9 +16,8 @@ use tokio_stomp_2::*;
 async fn main() -> Result<(), anyhow::Error> {
     let conn = client::connect(
         "127.0.0.1:61613",
-        "/".to_string(),
-        "guest".to_string().into(),
-        "guest".to_string().into(),
+        "admin".to_string().into(),
+        "admin".to_string().into(),
     )
     .await?;
 
