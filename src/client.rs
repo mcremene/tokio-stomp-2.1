@@ -2,7 +2,6 @@ use bytes::{Buf, BytesMut};
 use futures::prelude::*;
 use futures::sink::SinkExt;
 use std::net::ToSocketAddrs;
-
 use tokio::net::TcpStream;
 use tokio_util::codec::{Decoder, Encoder, Framed};
 
@@ -37,15 +36,17 @@ pub async fn connect_tls(
     login: Option<String>,
     passcode: Option<String>,
 ) -> Result<ClientTlsTransport> {
-    let addr = address.to_socket_addrs().unwrap().next().unwrap();
-    let tcp_stream = TcpStream::connect(&addr).await?;
+    let addr = address.to_socket_addrs()?.next().unwrap();
     // Set up the TLS connector
-    let native_tls_connector = NativeTlsConnector::new()?;
+    let native_tls_connector = NativeTlsConnector::builder()
+        .danger_accept_invalid_certs(true)
+        .build()?;
     let tls_connector = TlsConnector::from(native_tls_connector);
+    let tcp_stream = TcpStream::connect(&addr).await?;
     // Perform the TLS handshake
     let tls_stream: TlsStream<TcpStream> = tls_connector.connect(domain, tcp_stream).await?;
     let mut transport = ClientCodec.framed(tls_stream);
-    client_handshake_tsl(&mut transport, address, login, passcode).await?;
+    client_handshake_tls(&mut transport, address, login, passcode).await?;
     Ok(transport)
 }
 
@@ -76,7 +77,7 @@ async fn client_handshake(
     }
 }
 
-async fn client_handshake_tsl(
+async fn client_handshake_tls(
     transport: &mut ClientTlsTransport,
     address: &str,
     login: Option<String>,
