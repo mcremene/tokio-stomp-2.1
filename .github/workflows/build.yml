@@ -1,0 +1,55 @@
+name: Build RMT Proc
+
+on:
+  workflow_dispatch:
+    inputs: { }
+  push:
+    branches:
+      - main
+
+permissions:
+  id-token: write # This is required for requesting the JWT
+  contents: read  # This is required for actions/checkout
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    outputs:
+      imageTag: ${{ steps.containerImageTag.outputs.tag }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4.1.1
+
+      - name: Inject slug/short variables
+        uses: rlespinasse/github-slug-action@v4.4.1
+
+      - name: Container image tag
+        run: echo "IMAGE_TAG=${{ env.GITHUB_REF_SLUG }}-${{ env.GITHUB_SHA_SHORT }}" >> $GITHUB_ENV
+
+      - name: Set container image tag output
+        id: containerImageTag
+        run: echo "tag=${{ env.IMAGE_TAG }}" >> $GITHUB_OUTPUT
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4.0.2
+        with:
+          disable-retry: true
+          role-to-assume: arn:aws:iam::267384975958:role/github-actions
+          aws-region: us-east-2
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2.0.1
+
+      - name: Build, tag, and push RMT-Procimage to Amazon ECR
+        working-directory: .
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: rmt-proc
+          IMAGE_TAG: ${{ env.IMAGE_TAG }}-stomp2.1
+        run: |
+          docker buildx build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG  .
+          docker image push --all-tags $REGISTRY/$REPOSITORY
+
+      - name: Create summary
+        run: echo '### Built image `${{ env.IMAGE_TAG }}` published to AWS ECR! 🚀' >> $GITHUB_STEP_SUMMARY
