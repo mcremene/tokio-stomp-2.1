@@ -14,11 +14,17 @@ use tokio_stomp_2::*;
 
 #[tokio::main]
 async fn main() -> Result<(), anyhow::Error> {
+
+    let domain = dotenvy::var("DOMAIN").expect("DOMAIN must be set");
+    let host = dotenvy::var("HOST").expect("HOST must be set");
+    let user = dotenvy::var("USER").expect("USER must be set");
+    let pass = dotenvy::var("PASS").expect("PASS must be set");
+
     let conn = client::connect_tls(
-        "localhost",
-        "localhost:61617",
-        "admin".to_string().into(),
-        "admin".to_string().into(),
+        domain.as_str(),
+        host.as_str(),
+        user.into(),
+        pass.into(),
     )
     .await?;
 
