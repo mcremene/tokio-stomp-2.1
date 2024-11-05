@@ -2,8 +2,7 @@ use std::time::Duration;
 
 use futures::future::ok;
 use futures::prelude::*;
-use tokio_stomp_2::*;
-
+use tokio_stomp_2_1::*;
 // The example connects to a local server, then sends the following messages -
 // subscribe to a destination, send a message to the destination, unsubscribe and disconnect
 // It simultaneously receives and prints messages sent from the server, which in fact means

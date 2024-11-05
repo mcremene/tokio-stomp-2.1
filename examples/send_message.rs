@@ -1,6 +1,6 @@
 use futures::prelude::*;
-use tokio_stomp_2::client;
-use tokio_stomp_2::ToServer;
+use tokio_stomp_2_1::client;
+use tokio_stomp_2_1::ToServer;
 
 // You can start a simple STOMP server with docker:
 // `docker run -p 61613:61613 -p 8161:8161 rmohr/activemq:latest`

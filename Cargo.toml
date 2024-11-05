@@ -1,5 +1,5 @@
 [package]
-name = "tokio-stomp-2"
+name = "tokio-stomp-2_1"
 version = "0.3.1"
 description = "Unofficial successor to Asynchronous streaming STOMP client"
 authors = ["Jens Walter <jens@apimeister.com>, Alexander Kunde <a.kunde@outlook.com>"]
